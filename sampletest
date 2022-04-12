@@ -1,0 +1,47 @@
+pageextension 50143 SalesOrderEx extends "Sales Order"
+{
+    actions
+    {
+        // Add changes to page actions here
+        addlast("&Print")
+        {
+
+            action("Download Report")
+            {
+                ApplicationArea = All;
+                Image = ExportFile;
+                trigger OnAction()
+                var
+                    TempBlob: Codeunit "Temp Blob";
+                    Out: OutStream;
+                    RecRef: RecordRef;
+                    FileManagement: Codeunit "File Management";
+                    SalesHeader: Record "Sales Header";
+                begin
+                    TempBlob.CreateOutStream(Out, TEXTENCODING::UTF8);
+                    SalesHeader.Reset;
+                    SalesHeader.SetRange("Document Type", Rec."Document Type");
+                    SalesHeader.SetRange("No.", Rec."No.");
+                    SalesHeader.FindFirst();
+                    RecRef.GetTable(SalesHeader);
+                    REPORT.SAVEAS(752, '', REPORTFORMAT::Pdf, Out, RecRef);
+                    FileManagement.BLOBExport(TempBlob, STRSUBSTNO('SalesOrder_%1.Pdf', rec."No."), TRUE);
+                end;
+
+            }
+            action(Email)
+            {
+                ApplicationArea = all;
+                trigger OnAction()
+                var
+                    // SMTPMailSetup:Record "SMTP Mail Setup";
+                    SmtpMail: Codeunit "Email Message";
+                    CustomerRec: Record Customer;
+                    CustomerEmail: Text[100];
+                begin
+                    //if cust
+                end;
+            }
+        }
+    }
+}
